@@ -2,7 +2,6 @@ import 'package:ecommerce_app/providers/cart_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ecommerce_app/screens/payment_screen.dart';
-import 'package:ecommerce_app/screens/order_success_screen.dart';
 import 'package:google_fonts/google_fonts.dart'; // Add this import
 
 class CartScreen extends StatelessWidget {

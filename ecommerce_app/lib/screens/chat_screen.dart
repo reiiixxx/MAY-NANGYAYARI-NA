@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
   // 1. This is the "chat room ID". It's just the user's ID.
-  final String chatRoomId;
+  final String chatRoomId; 
   // 2. This is for the AppBar title (e.g., "Chat with user@example.com")
-  final String? userName;
+  final String? userName; 
 
   const ChatScreen({
     super.key,
@@ -27,10 +27,9 @@ class _ChatScreenState extends State<ChatScreen> {
   // 4. Controllers
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-
-// The logic and UI will go here next...
+  
   // ... (inside _ChatScreenState)
-
+  
   // 1. This function runs ONCE when the screen is loaded
   @override
   void initState() {
@@ -41,22 +40,24 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _markMessagesAsRead() async {
     final User? currentUser = _auth.currentUser;
     if (currentUser == null) return;
-
+    
     // 2. We need to know which counter to reset
     // 3. If I am the USER opening this chat:
     if (currentUser.uid == widget.chatRoomId) {
       await _firestore.collection('chats').doc(widget.chatRoomId).set({
         'unreadByUserCount': 0, // Reset the user's count
-      }, SetOptions(
-          merge: true)); // 'merge: true' creates the doc if it doesn't exist
-    }
+      }, SetOptions(merge: true)); // 'merge: true' creates the doc if it doesn't exist
+    } 
     // 4. If I am the ADMIN opening this chat:
-    else {
+    else { 
       await _firestore.collection('chats').doc(widget.chatRoomId).set({
         'unreadByAdminCount': 0, // Reset the admin's count
       }, SetOptions(merge: true));
     }
   }
+
+  // ... (inside _ChatScreenState)
+
   Future<void> _sendMessage() async {
     if (_messageController.text.trim().isEmpty) return;
 
@@ -65,7 +66,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     final String messageText = _messageController.text.trim();
     _messageController.clear();
-
+    
     final timestamp = FieldValue.serverTimestamp();
 
     try {
@@ -87,15 +88,15 @@ class _ChatScreenState extends State<ChatScreen> {
         'lastMessage': messageText,
         'lastMessageAt': timestamp,
       };
-
+      
       // 1. If I am the USER sending:
       if (currentUser.uid == widget.chatRoomId) {
         parentDocData['userEmail'] = currentUser.email;
         // Increment the ADMIN's unread count
         parentDocData['unreadByAdminCount'] = FieldValue.increment(1);
-      }
+      } 
       // 2. If I am the ADMIN sending:
-      else {
+      else { 
         // Increment the USER's unread count
         parentDocData['unreadByUserCount'] = FieldValue.increment(1);
       }
@@ -117,7 +118,8 @@ class _ChatScreenState extends State<ChatScreen> {
       print("Error sending message: $e");
     }
   }
-  @override
+
+ @override
   Widget build(BuildContext context) {
     final User? currentUser = _auth.currentUser;
 
@@ -138,7 +140,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   .collection('messages')
                   .orderBy('createdAt', descending: false) // Oldest first
                   .snapshots(),
-
+              
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -149,9 +151,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return const Center(child: Text('Say hello!'));
                 }
-
+                
                 final messages = snapshot.data!.docs;
-
+                
                 return ListView.builder(
                   controller: _scrollController,
                   itemCount: messages.length,

@@ -3,7 +3,6 @@ import 'package:ecommerce_app/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
 
 
-
 class AdminChatListScreen extends StatelessWidget {
   const AdminChatListScreen({super.key});
   @override
@@ -35,11 +34,11 @@ class AdminChatListScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final chatDoc = chatDocs[index];
               final chatData = chatDoc.data() as Map<String, dynamic>;
-
+              
               final String userId = chatDoc.id;
               final String userEmail = chatData['userEmail'] ?? 'User ID: $userId';
               final String lastMessage = chatData['lastMessage'] ?? '...';
-
+              
               // 2. --- NEW: Get the admin's unread count ---
               final int unreadCount = chatData['unreadByAdminCount'] ?? 0;
 
@@ -47,19 +46,19 @@ class AdminChatListScreen extends StatelessWidget {
                 leading: const Icon(Icons.person),
                 title: Text(userEmail, style: const TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: Text(
-                  lastMessage,
-                  maxLines: 1,
+                  lastMessage, 
+                  maxLines: 1, 
                   overflow: TextOverflow.ellipsis,
                 ),
-
+                
                 // 3. --- NEW: Show a Badge on the trailing icon ---
                 trailing: unreadCount > 0
                     ? Badge(
-                  label: Text('$unreadCount'),
-                  child: const Icon(Icons.arrow_forward_ios),
-                )
+                        label: Text('$unreadCount'),
+                        child: const Icon(Icons.arrow_forward_ios),
+                      )
                     : const Icon(Icons.arrow_forward_ios),
-
+                
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
@@ -78,3 +77,4 @@ class AdminChatListScreen extends StatelessWidget {
     );
   }
 }
+

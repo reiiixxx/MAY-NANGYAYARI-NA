@@ -1,3 +1,5 @@
+import 'package:ecommerce_app/screens/admin_chat_list_screen.dart';
+import 'package:ecommerce_app/screens/chat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -48,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildProductCard(Map<String, dynamic> productData, String productId) {
     return Card(
       elevation: 4,
+      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
@@ -62,148 +65,88 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         },
-        borderRadius: BorderRadius.circular(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Product Image
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-              child: Container(
-                height: 150,
-                width: double.infinity,
-                color: const Color(0xFFF8FFF5),
-                child: productData['imageUrl'] != null &&
-                    productData['imageUrl'].isNotEmpty
-                    ? Image.network(
-                  productData['imageUrl'],
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: const Color(0xFF4CAF50).withOpacity(0.1),
-                      child: const Icon(
-                        Icons.restaurant_menu,
-                        color: Color(0xFF4CAF50),
-                        size: 50,
-                      ),
-                    );
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      color: const Color(0xFF4CAF50).withOpacity(0.1),
-                      child: const Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                              Color(0xFF4CAF50)),
-                        ),
-                      ),
-                    );
-                  },
-                )
-                    : Container(
-                  color: const Color(0xFF4CAF50).withOpacity(0.1),
-                  child: const Icon(
-                    Icons.restaurant_menu,
-                    color: Color(0xFF4CAF50),
-                    size: 50,
-                  ),
+            SizedBox(
+              height: 120,
+              width: double.infinity,
+              child: productData['imageUrl'] != null &&
+                  productData['imageUrl'].isNotEmpty
+                  ? Image.network(
+                productData['imageUrl'],
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: const Color(0xFF4CAF50).withOpacity(0.1),
+                    child: const Icon(
+                      Icons.restaurant_menu,
+                      color: Color(0xFF4CAF50),
+                      size: 50,
+                    ),
+                  );
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4CAF50)),
+                    ),
+                  );
+                },
+              )
+                  : Container(
+                color: const Color(0xFF4CAF50).withOpacity(0.1),
+                child: const Icon(
+                  Icons.restaurant_menu,
+                  color: Color(0xFF4CAF50),
+                  size: 50,
                 ),
               ),
             ),
-            // Product Details
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Product Name
-                  Text(
-                    productData['name'] ?? 'Unnamed Product',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2E7D32),
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  // Product Description
-                  if (productData['description'] != null)
-                    Text(
-                      productData['description'],
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  const SizedBox(height: 8),
-                  // Price
-                  Text(
-                    '\$${productData['price']?.toStringAsFixed(2) ?? '0.00'}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF4CAF50),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  // Add to Cart Button
-                  Container(
-                    width: double.infinity,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF4CAF50), Color(0xFF45a049)],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      ),
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Add to cart functionality
-                        final cartProvider =
-                        Provider.of<CartProvider>(context, listen: false);
-                        cartProvider.addToCart(
-                          productId: productId,
-                          productName: productData['name'] ?? 'Product',
-                          price: (productData['price'] as num).toDouble(),
-                          imageUrl: productData['imageUrl'] ?? '',
-                        );
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Added ${productData['name']} to cart'),
-                            backgroundColor: const Color(0xFF4CAF50),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          productData['name'] ?? 'Unnamed Product',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2E7D32),
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        padding: EdgeInsets.zero,
-                      ),
-                      child: const Text(
-                        'Add to Cart',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
+                        const SizedBox(height: 4),
+                        if (productData['description'] != null)
+                          Text(
+                            productData['description'],
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
+                    ),
+                    Text(
+                      '₱${productData['price']?.toStringAsFixed(2) ?? '0.00'}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF4CAF50),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -226,75 +169,24 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         }
-
         if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Colors.red,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Error loading products: ${snapshot.error}',
-                  style: const TextStyle(color: Colors.red),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          );
+          return Center(child: Text('Error loading products: ${snapshot.error}'));
         }
-
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF4CAF50).withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.restaurant_menu,
-                    size: 50,
-                    color: Color(0xFF4CAF50),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'No Products Available',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF2E7D32),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Check back later for new meal kits!',
-                  style: TextStyle(color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          );
+          return const Center(child: Text('No Products Available'));
         }
 
         final products = snapshot.data!.docs;
 
         return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
-            childAspectRatio: 0.7,
+            childAspectRatio: 0.65,
           ),
           itemCount: products.length,
           itemBuilder: (context, index) {
@@ -304,43 +196,6 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         );
       },
-    );
-  }
-
-  // ... (Keep all your existing methods: _buildHamburgerMenu, _showHamburgerMenu, 
-  // _buildHamburgerMenuItems, _buildHamburgerMenuItem, _buildIconsRow, 
-  // _buildAllIcons, _buildModernIconButton, _buildFoodIcon)
-
-  // These methods remain exactly the same as in your original code
-  Widget _buildHamburgerMenu() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Consumer<CartProvider>(
-          builder: (context, cart, child) {
-            return _buildModernIconButton(
-              icon: Icons.shopping_bag_outlined,
-              badgeCount: cart.itemCount,
-              tooltip: 'Cart',
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const CartScreen(),
-                  ),
-                );
-              },
-            );
-          },
-        ),
-        const SizedBox(width: 8),
-        _buildModernIconButton(
-          icon: Icons.menu,
-          tooltip: 'Menu',
-          onPressed: () {
-            _showHamburgerMenu(context);
-          },
-        ),
-      ],
     );
   }
 
@@ -356,20 +211,13 @@ class _HomeScreenState extends State<HomeScreen> {
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 10,
-                offset: const Offset(0, -2),
-              ),
-            ],
           ),
           child: SafeArea(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: Row(
                     children: [
                       const Text(
@@ -383,15 +231,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.close, color: Color(0xFF2E7D32)),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                        onPressed: () => Navigator.pop(context),
                       ),
                     ],
                   ),
                 ),
-                ..._buildHamburgerMenuItems(),
-                const SizedBox(height: 20),
+                _buildHamburgerMenuItems(),
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -400,132 +246,253 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  List<Widget> _buildHamburgerMenuItems() {
-    return [
-      _buildHamburgerMenuItem(
-        icon: Icons.receipt_long_outlined,
-        title: 'My Orders',
-        onTap: () {
-          Navigator.pop(context);
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const OrderHistoryScreen(),
-            ),
-          );
-        },
-      ),
-      if (_userRole == 'admin')
-        _buildHamburgerMenuItem(
-          icon: Icons.dashboard_outlined,
-          title: 'Admin Panel',
-          onTap: () {
-            Navigator.pop(context);
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const AdminPanelScreen(),
-              ),
+  Widget _buildHamburgerMenuItems() {
+    return Column(
+      children: [
+        if (_userRole == 'user')
+          StreamBuilder<DocumentSnapshot>(
+              stream: _firestore.collection('chats').doc(_currentUser!.uid).snapshots(),
+              builder: (context, snapshot) {
+                int unreadCount = 0;
+                if (snapshot.hasData && snapshot.data!.exists) {
+                  final data = snapshot.data!.data() as Map<String, dynamic>?;
+                  if (data != null) {
+                    unreadCount = data['unreadByUserCount'] ?? 0;
+                  }
+                }
+                return _buildHamburgerMenuItem(
+                  icon: Icons.support_agent,
+                  title: 'Contact Admin',
+                  badgeCount: unreadCount,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ChatScreen(chatRoomId: _currentUser!.uid),
+                    ));
+                  },
+                );
+              }),
+        Consumer<CartProvider>(
+          builder: (context, cart, child) {
+            return _buildHamburgerMenuItem(
+              icon: Icons.shopping_bag_outlined,
+              title: 'Cart',
+              badgeCount: cart.itemCount,
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const CartScreen()));
+              },
             );
           },
         ),
-      _buildHamburgerMenuItem(
-        icon: Icons.person_outlined,
-        title: 'Profile',
-        onTap: () {
-          Navigator.pop(context);
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const ProfileScreen(),
-            ),
-          );
-        },
-      ),
-    ];
+        _buildHamburgerMenuItem(
+          icon: Icons.receipt_long_outlined,
+          title: 'My Orders',
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const OrderHistoryScreen()));
+          },
+        ),
+        if (_userRole == 'admin') ...[
+           _buildHamburgerMenuItem(
+            icon: Icons.chat_bubble_outline,
+            title: 'View User Chats',
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminChatListScreen()));
+            },
+          ),
+          _buildHamburgerMenuItem(
+            icon: Icons.dashboard_outlined,
+            title: 'Admin Panel',
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminPanelScreen()));
+            },
+          ),
+        ],
+        _buildHamburgerMenuItem(
+          icon: Icons.person_outlined,
+          title: 'Profile',
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProfileScreen()));
+          },
+        ),
+      ],
+    );
   }
 
   Widget _buildHamburgerMenuItem({
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    int badgeCount = 0,
   }) {
     return ListTile(
-      leading: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8FFF5),
-          shape: BoxShape.circle,
-          border: Border.all(color: const Color(0xFF4CAF50).withOpacity(0.3)),
-        ),
-        child: Icon(icon, color: const Color(0xFF4CAF50), size: 20),
+      leading: Badge(
+        label: Text('$badgeCount'),
+        isLabelVisible: badgeCount > 0,
+        child: Icon(icon, color: const Color(0xFF4CAF50), size: 24),
       ),
-      title: Text(
-        title,
-        style: const TextStyle(color: Color(0xFF2E7D32)),
-      ),
+      title: Text(title, style: const TextStyle(color: Color(0xFF2E7D32))),
       onTap: onTap,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final useHamburgerMenu = screenWidth < 600;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FFF5),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: const Color(0xFFF8FFF5),
+        elevation: 0,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(width: 40), // Placeholder for spacing
+            // Logo
+            SizedBox(
+              height: 50,
+              child: Image.asset('assets/images/app_logo.png', fit: BoxFit.contain),
+            ),
+            useHamburgerMenu
+                ? IconButton(
+              icon: const Icon(Icons.menu, color: Color(0xFF2E7D32)),
+              onPressed: () => _showHamburgerMenu(context),
+            )
+                : _buildIconsRow(),
+          ],
+        ),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Welcome Section
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Welcome to Your Meal Kit!",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF2E7D32),
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Your culinary journey starts here. Discover delicious recipes and fresh ingredients delivered to your door.",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Products Section Header
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.0),
+                child: Text(
+                  "Available Meal Kits",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2E7D32),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildProductsGrid(),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildIconsRow() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
-      children: _buildAllIcons(),
-    );
-  }
-
-  List<Widget> _buildAllIcons() {
-    return [
-      Consumer<CartProvider>(
-        builder: (context, cart, child) {
-          return _buildModernIconButton(
-            icon: Icons.shopping_bag_outlined,
-            badgeCount: cart.itemCount,
-            tooltip: 'Cart',
+      children: [
+        if (_userRole == 'user' && _currentUser != null)
+          StreamBuilder<DocumentSnapshot>(
+              stream: _firestore.collection('chats').doc(_currentUser!.uid).snapshots(),
+              builder: (context, snapshot) {
+                int unreadCount = 0;
+                if (snapshot.hasData && snapshot.data!.exists) {
+                  final data = snapshot.data!.data() as Map<String, dynamic>?;
+                  if (data != null) {
+                    unreadCount = data['unreadByUserCount'] ?? 0;
+                  }
+                }
+                return _buildModernIconButton(
+                  icon: Icons.support_agent,
+                  tooltip: 'Contact Admin',
+                  badgeCount: unreadCount,
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ChatScreen(chatRoomId: _currentUser!.uid),
+                    ));
+                  },
+                );
+              }),
+        if (_userRole == 'admin')
+          _buildModernIconButton(
+            icon: Icons.chat_bubble_outline,
+            tooltip: 'View User Chats',
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const CartScreen(),
-                ),
-              );
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminChatListScreen()));
             },
-          );
-        },
-      ),
-      _buildModernIconButton(
-        icon: Icons.receipt_long_outlined,
-        tooltip: 'My Orders',
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const OrderHistoryScreen(),
-            ),
-          );
-        },
-      ),
-      if (_userRole == 'admin')
-        _buildModernIconButton(
-          icon: Icons.dashboard_outlined,
-          tooltip: 'Admin Panel',
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const AdminPanelScreen(),
-              ),
+          ),
+        Consumer<CartProvider>(
+          builder: (context, cart, child) {
+            return _buildModernIconButton(
+              icon: Icons.shopping_bag_outlined,
+              badgeCount: cart.itemCount,
+              tooltip: 'Cart',
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const CartScreen()));
+              },
             );
           },
         ),
-      _buildModernIconButton(
-        icon: Icons.person_outlined,
-        tooltip: 'Profile',
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const ProfileScreen(),
-            ),
-          );
-        },
-      ),
-    ];
+        _buildModernIconButton(
+          icon: Icons.receipt_long_outlined,
+          tooltip: 'My Orders',
+          onPressed: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const OrderHistoryScreen()));
+          },
+        ),
+        if (_userRole == 'admin')
+          _buildModernIconButton(
+            icon: Icons.dashboard_outlined,
+            tooltip: 'Admin Panel',
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminPanelScreen()));
+            },
+          ),
+        _buildModernIconButton(
+          icon: Icons.person_outlined,
+          tooltip: 'Profile',
+          onPressed: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProfileScreen()));
+          },
+        ),
+      ],
+    );
   }
 
   Widget _buildModernIconButton({
@@ -569,7 +536,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4CAF50),
+                    color: Colors.red, // Changed badge color for better visibility
                     shape: BoxShape.circle,
                     border: Border.all(width: 1.5, color: Colors.white),
                   ),
@@ -593,185 +560,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  Widget _buildFoodIcon(IconData icon, Color color) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Icon(
-        icon,
-        color: color,
-        size: 20,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final useHamburgerMenu = screenWidth < 600;
-
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FFF5),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF8FFF5),
-        elevation: 0,
-        title: Row(
-          children: [
-            // Logo
-            Expanded(
-              child: Center(
-                child: Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(60),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF4CAF50).withOpacity(0.2),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                    border: Border.all(
-                      color: const Color(0xFF4CAF50).withOpacity(0.3),
-                      width: 2,
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Icon
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF4CAF50),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Icon(
-                          Icons.restaurant_menu,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      // MEAL KIT text
-                      Text(
-                        "MEAL KIT",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF2E7D32),
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-
-                      // SUBSCRIPTION text
-                      Text(
-                        "SUBSCRIPTION",
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF4CAF50),
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            // Icons on right
-            Expanded(
-              child: useHamburgerMenu
-                  ? _buildHamburgerMenu()
-                  : _buildIconsRow(),
-            ),
-          ],
-        ),
-      ),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Welcome Section
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Welcome Message
-                  Text(
-                    "Welcome to Your Meal Kit!",
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF2E7D32),
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  Text(
-                    "Your culinary journey starts here. Discover delicious recipes and fresh ingredients delivered to your door.",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Products Section Header
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.0),
-              child: Text(
-                "Available Meal Kits",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF2E7D32),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Products Grid
-            Expanded(
-              child: _buildProductsGrid(),
-            ),
-
-            // Bottom decorative elements
-            Container(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildFoodIcon(Icons.local_pizza, const Color(0xFFFF9800)),
-                  _buildFoodIcon(Icons.emoji_food_beverage, const Color(0xFF4CAF50)),
-                  _buildFoodIcon(Icons.cake, const Color(0xFFE91E63)),
-                  _buildFoodIcon(Icons.free_breakfast, const Color(0xFF795548)),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-extension on CartProvider {
-  void addToCart({required String productId, required productName, required double price, required imageUrl}) {}
 }
